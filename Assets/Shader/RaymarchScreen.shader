@@ -4,6 +4,8 @@ Shader "Custom/RaymarchImageEffect"
     {
         _MainTex ("Texture", 2D) = "white" {}
         _MaxDistance ("Max Distance", Range(0, 100)) = 10
+        _Background ("Background", Color) = (0.529, 0.808, 0.922, 1.0)
+        _Sigma_a ("Sigma_a", Range(0, 8)) = 5
     }
 
     SubShader
@@ -19,6 +21,8 @@ Shader "Custom/RaymarchImageEffect"
             #include "UnityCG.cginc"
 
             float _MaxDistance;
+            float4 _Background;
+            float _Sigma_a;
 
             struct appdata
             {
@@ -43,7 +47,7 @@ Shader "Custom/RaymarchImageEffect"
             float sdf(float3 p)
             {
                 // Signed Distance Function for a sphere
-                return length(p) - 0.3;
+                return length(p) - 0.5;
             }
             fixed4 frag (v2f i) : SV_Target
             {
@@ -62,23 +66,43 @@ Shader "Custom/RaymarchImageEffect"
                 float t = 0;
                 float maxT = _MaxDistance;
                 float3 p = rayOrigin;
+
+                float4 back_ground = _Background;
+                
+                // calculate the absorption effect of the volumetric fog
+                float absorption_T = 1.0;
+                float sigma_a = _Sigma_a;
+
+                float march_step = 0.01;
                 for (int i = 0; i < 100; i++)
                 {
-                    float dist = sdf(p);
-                    t += dist;
+                    // first step use the sdf to accelerate the raymarch
+                    if (t < 0.001)
+                    {
+                        float dist = sdf(p);
+                        t += dist;
+                    }
+                    else
+                    {
+                        t += march_step;
+                    }
+
                     p = rayOrigin + rayDirection * t;
-                    if (dist < 0.001 || t > maxT)
+                    float dist = sdf(p);
+                    if (dist < 0.001)
+                    {
+                        // calculate the absorption effect of the volumetric fog
+                        absorption_T *= exp(-sigma_a * march_step);
+                    }
+                    if (t > maxT)
                     {
                         break;
                     }
                 }
 
-                if (t > maxT){
-                    return float4(0, 0, 0, 1);
-                }
-                else{
-                    return float4(1, 1, 1, 1);
-                }
+                // calculate the final color
+                float4 color = back_ground * absorption_T;
+                return fixed4(color.rgb, 1.0);
             }
             ENDCG
         }
