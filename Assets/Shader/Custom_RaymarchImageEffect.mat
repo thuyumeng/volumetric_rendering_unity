@@ -27,5 +27,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _MaxDistance: 8.3
-    m_Colors: []
+    - _Sigma_a: 2.82
+    m_Colors:
+    - _Background: {r: 0.529, g: 0.808, b: 0.922, a: 1}
   m_BuildTextureStacks: []

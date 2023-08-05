@@ -26,7 +26,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Sigma_a: 5
+    - _Sigma_a: 2.85
+    - _Sigma_s: 5
     m_Colors:
     - _Background: {r: 0.529, g: 0.808, b: 0.922, a: 1}
+    - _DirectLightColor: {r: 1, g: 0.41199994, b: 0.706, a: 1}
+    - _DirectLightDirection: {r: 0, g: 0, b: 1, a: 1}
   m_BuildTextureStacks: []
